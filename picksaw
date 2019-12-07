@@ -1,0 +1,35 @@
+#!/bin/sh
+
+COMMIT=$1
+TMP=/tmp/picksaw
+TMPJSON=$(mktemp /tmp/picksaw-json.XXXXXXXXXX)
+CWD=$(pwd)
+MYDIR="$(dirname "$(readlink -f "$0")")"
+
+sub_version() {
+    rev=$(git ls-tree "${COMMIT}" "deps/$1" | cut -d ' ' -f 3 | cut -f 1)
+    echo "\"${rev}\""
+}
+
+revs_json() {
+    if [ ! -e "${TMP}" ]; then
+        git clone "https://github.com/GaloisInc/saw-script" "${TMP}"
+    fi
+
+    cd "${TMP}"
+    git fetch -a
+
+    echo "{"
+
+    for m in $(ls deps); do
+        echo "\"$m\": $(sub_version $m),"
+    done
+
+    echo "\"end\": 0"
+    echo "}"
+    cd "${CWD}"
+}
+
+revs_json > "${TMPJSON}"
+
+nix run -f "${MYDIR}/picksaw.nix" --argstr commit "${COMMIT}" --argstr subs "${TMPJSON}" -c saw "${@:2}"
