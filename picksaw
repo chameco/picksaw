@@ -1,6 +1,11 @@
 #!/bin/sh
 
 COMMIT=$1
+
+if [ -z "${COMMIT}" ]; then
+    COMMIT="master"
+fi
+
 TMP=/tmp/picksaw
 TMPJSON=$(mktemp /tmp/picksaw-json.XXXXXXXXXX)
 CWD=$(pwd)
