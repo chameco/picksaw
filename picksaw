@@ -3,7 +3,8 @@
 COMMIT=$1
 
 if [ -z "${COMMIT}" ]; then
-    COMMIT="master"
+    echo "usage: $0 commit [arg...]"
+    exit 1
 fi
 
 TMP=/tmp/picksaw
